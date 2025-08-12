@@ -15,8 +15,10 @@ export class AuthService {
         private usersRepository: Repository<User>,
     private jwtService: JwtService,
       ) {
+        bcrypt.hash('123456', 10).then(console.log);
       }
       async register(registerDto:RegisterDto){
+        console.log("HIii")
         const existingUser = await this.usersRepository.findOne({
           where: { email: registerDto.email },
         });

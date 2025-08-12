@@ -5,7 +5,7 @@ import { HelloModule } from './hello/hello.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/app.config';
-
+// import { JwtModule } from '@nestjs/jwt';
 @Module({
 
   imports: [
@@ -13,6 +13,7 @@ import appConfig from './config/app.config';
       isGlobal:true,
       load: [appConfig],
     }),
+
     HelloModule, UserModule],
   controllers: [AppController],
   providers: [AppService],

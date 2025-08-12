@@ -8,17 +8,25 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategies';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    PassportModule,
+    JwtModule.register({}),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 3000,
+      max: 10
+    }),
+    // ✅ This makes DataSource available
+    TypeOrmModule,  
+  ],
   providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
   controllers: [AuthController],
-  imports:[
-    TypeOrmModule.forFeature([User]),
-    JwtModule.register({}),
-    PassportModule,
-  ],
   exports: [AuthService, JwtAuthGuard, RolesGuard],
 })
-export class AuthModule {
-
-}
+export class AuthModule {}

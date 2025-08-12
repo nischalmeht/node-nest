@@ -1,18 +1,20 @@
-
+// import { Post } from 'src/posts/entities/post.entity';
 import { Post } from 'src/post/entities/post.entities';
 import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-  } from 'typeorm';
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
 export enum UserRole {
-    USER = 'user',
-    ADMIN = 'admin',
-  }
-  @Entity()
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
+@Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;

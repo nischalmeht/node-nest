@@ -6,6 +6,7 @@ import { Roles } from './decorators/roles.decorater';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserRole } from './entities/user.entities';
+import { LoginThrottlerGuard } from './guards/login-throttler.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -13,8 +14,10 @@ export class AuthController {
 
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
+    console.log('joio')
     return this.authService.register(registerDto);
   }
+  @UseGuards(LoginThrottlerGuard)
   @Post('login')
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

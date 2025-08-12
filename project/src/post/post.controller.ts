@@ -1,70 +1,91 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Query, Post as HttpPost, UsePipes, ValidationPipe, Put, Post, HttpStatus, HttpCode } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { PostService } from './post.service';
-import { Post as PostInterface } from './interfaces/post.interface';
-import { CreatePropertyDto } from 'src/dto/createProperty.dto';
-import { UpdatePostDto } from 'src/dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+// import { PostExistsPipe } from './pipes/post-exists.pipe';
+// import { Post as PostEntity } from './entities/post.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { FindPostsQueryDto } from './dto/find-posts-query.dto';
+import { Post as PostEntity} from './entities/post.entities';
+import { PaginatedResponse } from 'src/common/interfaces/paginated-interface.inteface';
+import { CurrentUser } from 'src/auth/decorators/current-role.decorater';
 import { PostExistsPipe } from './pipes/post-exists-pipe';
-import { Post as PostEntity } from './entities/post.entities';
-@Controller('post')
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from 'src/auth/entities/user.entities';
+import { Roles } from 'src/auth/decorators/roles.decorater';
+// import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+// import { Roles } from 'src/auth/decorators/roles.decorators';
+// import { UserRole } from 'src/auth/entities/user.entity';
+// import { RolesGuard } from 'src/auth/guards/roles-guard';
+// import { FindPostsQueryDto } from './dto/find-posts-query.dto';
+// import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface';
+
+@Controller('posts')
 export class PostController {
-  constructor(private readonly postservice: PostService) { }
-  // @Get()
-  // findAll(@Query('search') search?: string): PostInterface[] {
-  //   const extractAllPosts = this.postservice.findOne(1)
-  //   // if (search) {
-  //   //   return extractAllPosts.filter(singlePost => singlePost.title.toLowerCase().includes(search.toLowerCase()))
-  //   // }
-  //   return extractAllPosts
-  // }
-  // @Get(':id')
-  // findOne(@Param('id',ParseIntPipe)PostExistsPipe,id:number):PostInterface{
-  //     return this.postservice.findOne(id)
-  // }
+  constructor(private readonly postsService: PostService) {}
+
+  @Get()
+  async findAll(
+    @Query() query: FindPostsQueryDto,
+  ): Promise<PaginatedResponse<PostEntity>> {
+    return this.postsService.findAll(query);
+  }
 
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe, PostExistsPipe) id: number,
   ): Promise<PostEntity> {
-    return this.postservice.findOne(id);
+    return this.postsService.findOne(id);
   }
-  // @Get(':id')
-  // async findOne(
-  //   @Param('id', ParseIntPipe, PostExistsPipe) id: number,
-  // ): Promise<PostEntity> {
-  //   return this.postservice.findOne(id);
-  // }
-  // create(createPostData:Omit<Post,'id' | 'creaderAt'>):Post{
-  //     const newPost:Post={
-  //         id:
-  //     }
-  // }
-  //   @Post('')
-  //   @HttpCode(HttpStatus.CREATED)
-  //   create(@Body() createPostData:CreatePostDto):PostInterface{
 
-  // }
-  // @Post('')
-  // @HttpPost()
-  // @UsePipes(
-  //   new ValidationPipe({
-  //     whitelist: true,
-  //     forbidNonWhitelisted: true,
-  //     transform: true,
-  //     disableErrorMessages: true,
-  //     groups: ['create'], // important!
-  //   }),
-  // )
-  // create(@Body() body: CreatePropertyDto): PostInterface {
-  //   return this.postservice.create(body);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Post('')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
+  async create(
+    @Body() createPostData: CreatePostDto,
+    @CurrentUser() user: any,
+  ): Promise<PostEntity> {
+    return this.postsService.create(createPostData, user);
+  }
 
-  // @Put(':id')
-  // async update(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() updatePostData: UpdatePostDto,      
-  // ): Promise<PostInterface> {
-  // //   return this.postservice.update(id, updatePostData, user);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  async update(
+    @Param('id', ParseIntPipe, PostExistsPipe) id: number,
+    @Body() updatePostData: UpdatePostDto,
+    @CurrentUser() user: any,
+  ): Promise<PostEntity> {
+    return this.postsService.update(id, updatePostData, user);
+  }
 
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @Param('id', ParseIntPipe, PostExistsPipe) id: number,
+  ): Promise<void> {
+    this.postsService.remove(id);
+  }
 }
