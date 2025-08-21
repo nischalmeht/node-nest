@@ -12,6 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { FileUploadModule } from './file-upload/file-upload.module';
 // @Module({
 //   imports: [
 //     ConfigModule.forRoot({
@@ -93,6 +94,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     }),
     PostModule,
     AuthModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
